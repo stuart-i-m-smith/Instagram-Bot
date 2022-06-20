@@ -5,6 +5,7 @@ import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URI;
@@ -14,10 +15,14 @@ import java.util.concurrent.TimeUnit;
 
 public class FtxClient implements Client {
 
+    private final String currency;
     private final TickManager tickManager;
+    private final TickManager futuresTickManager;
 
-    public FtxClient(TickManager manager){
-        this.tickManager = manager;
+    public FtxClient(String currency, TickManager tickManager, TickManager futuresTickManager){
+        this.currency = currency;
+        this.tickManager = tickManager;
+        this.futuresTickManager = futuresTickManager;
     }
 
     @Override
@@ -30,6 +35,7 @@ public class FtxClient implements Client {
 
                 @Override
                 public void onMessage(String message) {
+                    System.out.println(message);
 
                     JSONObject json = new JSONObject(message);
 
@@ -37,14 +43,17 @@ public class FtxClient implements Client {
                         return;
                     }
 
-                    String type = json.getString("channel");
+                    String channel = json.getString("channel");
 
-                    if ("ticker".equals(type)) {
+                    if ("orderbook".equals(channel)) {
 
                         if(json.has("data")) {
                             JSONObject data = json.getJSONObject("data");
-                            double bid = data.getDouble("bid");
-                            double ask = data.getDouble("ask");
+                            JSONArray bids = data.getJSONArray("bids");
+                            JSONArray asks = data.getJSONArray("asks");
+
+                            double bid = bids.length() == 0 ? lastBid : bids.getJSONArray(0).getDouble(0);
+                            double ask = asks.length() == 0 ? lastAsk : asks.getJSONArray(0).getDouble(0);
 
                             if(!Precision.equals(lastBid, bid) ||
                                 !Precision.equals(lastAsk, ask)) {
@@ -85,10 +94,13 @@ public class FtxClient implements Client {
 
             JSONObject subscribeMessage = new JSONObject();
             subscribeMessage.put("op", "subscribe");
-            subscribeMessage.put("channel", "ticker");
-            subscribeMessage.put("market", "ADA/USD");
+            subscribeMessage.put("channel", "orderbook");
 
+            subscribeMessage.put("market", currency+"/USD");
             client.send(subscribeMessage.toString());
+
+//            subscribeMessage.put("market", currency+"-PERP");
+//            client.send(subscribeMessage.toString());
 
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
                     () -> client.send("{'op': 'ping'}"),
