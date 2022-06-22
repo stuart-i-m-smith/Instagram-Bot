@@ -14,9 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 public class CoinbaseClient implements Client {
 
+    private final String currency;
     private final TickManager tickManager;
 
-    public CoinbaseClient(TickManager manager){
+    public CoinbaseClient(String currency, TickManager manager){
+        this.currency = currency;
         this.tickManager = manager;
     }
 
@@ -76,7 +78,7 @@ public class CoinbaseClient implements Client {
             client.connectBlocking(10, TimeUnit.SECONDS);
 
             JSONArray products = new JSONArray();
-            products.put("ADA-USD");
+            products.put(currency+"-USD");
 
             JSONArray channels = new JSONArray();
             channels.put("ticker");

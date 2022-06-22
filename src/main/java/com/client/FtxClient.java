@@ -30,13 +30,13 @@ public class FtxClient implements Client {
         try {
             WebSocketClient client = new WebSocketClient(new URI("wss://ftx.com/ws/")) {
 
-                private volatile double lastBid = 0;
-                private volatile double lastAsk = 0;
+                private volatile double lastSpotBid = 0;
+                private volatile double lastSpotAsk = 0;
+                private volatile double lastFutureBid = 0;
+                private volatile double lastFutureAsk = 0;
 
                 @Override
                 public void onMessage(String message) {
-                    System.out.println(message);
-
                     JSONObject json = new JSONObject(message);
 
                     if(!json.has("channel")){
@@ -52,23 +52,46 @@ public class FtxClient implements Client {
                             JSONArray bids = data.getJSONArray("bids");
                             JSONArray asks = data.getJSONArray("asks");
 
-                            double bid = bids.length() == 0 ? lastBid : bids.getJSONArray(0).getDouble(0);
-                            double ask = asks.length() == 0 ? lastAsk : asks.getJSONArray(0).getDouble(0);
+                            if(json.getString("market").contains("/USD")) {
 
-                            if(!Precision.equals(lastBid, bid) ||
-                                !Precision.equals(lastAsk, ask)) {
+                                double bid = bids.length() == 0 ? lastSpotBid : bids.getJSONArray(0).getDouble(0);
+                                double ask = asks.length() == 0 ? lastSpotAsk : asks.getJSONArray(0).getDouble(0);
 
-                                Tick tick = new Tick.Builder()
-                                        .exchange("ftx")
-                                        .timestamp(Instant.ofEpochMilli(((Number) data.getDouble("time")).longValue() * 1000))
-                                        .bid(bid)
-                                        .ask(ask)
-                                        .build();
+                                if (!Precision.equals(lastSpotBid, bid) ||
+                                        !Precision.equals(lastSpotAsk, ask)) {
 
-                                lastBid = bid;
-                                lastAsk = ask;
+                                    Tick tick = new Tick.Builder()
+                                            .exchange("ftx")
+                                            .timestamp(Instant.ofEpochMilli(((Number) data.getDouble("time")).longValue() * 1000))
+                                            .bid(bid)
+                                            .ask(ask)
+                                            .build();
 
-                                tickManager.offer(tick);
+                                    lastSpotBid = bid;
+                                    lastSpotAsk = ask;
+
+                                    tickManager.offer(tick);
+                                }
+                            }else{
+
+                                double bid = bids.length() == 0 ? lastFutureBid : bids.getJSONArray(0).getDouble(0);
+                                double ask = asks.length() == 0 ? lastFutureAsk : asks.getJSONArray(0).getDouble(0);
+
+                                if (!Precision.equals(lastFutureBid, bid) ||
+                                        !Precision.equals(lastFutureAsk, ask)) {
+
+                                    Tick tick = new Tick.Builder()
+                                            .exchange("ftx")
+                                            .timestamp(Instant.ofEpochMilli(((Number) data.getDouble("time")).longValue() * 1000))
+                                            .bid(bid)
+                                            .ask(ask)
+                                            .build();
+
+                                    lastFutureBid = bid;
+                                    lastFutureAsk = ask;
+
+                                    futuresTickManager.offer(tick);
+                                }
                             }
                         }
                     }
@@ -99,8 +122,8 @@ public class FtxClient implements Client {
             subscribeMessage.put("market", currency+"/USD");
             client.send(subscribeMessage.toString());
 
-//            subscribeMessage.put("market", currency+"-PERP");
-//            client.send(subscribeMessage.toString());
+            subscribeMessage.put("market", currency+"-PERP");
+            client.send(subscribeMessage.toString());
 
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
                     () -> client.send("{'op': 'ping'}"),

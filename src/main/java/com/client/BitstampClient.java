@@ -14,9 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 public class BitstampClient implements Client {
 
+    private final String currency;
     private final TickManager tickManager;
 
-    public BitstampClient(TickManager manager){
+    public BitstampClient(String currency, TickManager manager){
+        this.currency = currency;
         this.tickManager = manager;
     }
 
@@ -85,7 +87,7 @@ public class BitstampClient implements Client {
             client.connectBlocking(10, TimeUnit.SECONDS);
 
             JSONObject data = new JSONObject();
-            data.put("channel", "order_book_adausd");
+            data.put("channel", "order_book_"+currency+"usd");
 
             JSONObject subscribeMessage = new JSONObject();
             subscribeMessage.put("event", "bts:subscribe");

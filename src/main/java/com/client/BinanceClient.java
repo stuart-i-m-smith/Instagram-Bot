@@ -11,9 +11,11 @@ import java.time.Instant;
 
 public class BinanceClient implements Client {
 
+    private final String currency;
     private final TickManager tickManager;
 
-    public BinanceClient(TickManager manager){
+    public BinanceClient(String currency, TickManager manager){
+        this.currency = currency;
         this.tickManager = manager;
     }
 
@@ -24,7 +26,7 @@ public class BinanceClient implements Client {
 
         System.out.println("Connected to Binance.");
 
-        client.bookTicker("adausdt", new WebSocketCallback() {
+        client.bookTicker(currency + "usdt", new WebSocketCallback() {
             private volatile double lastBid = 0;
             private volatile double lastAsk = 0;
 

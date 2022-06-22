@@ -15,9 +15,11 @@ import java.util.concurrent.TimeUnit;
 
 public class KrakenClient implements Client {
 
+    private final String currency;
     private final TickManager tickManager;
 
-    public KrakenClient(TickManager manager){
+    public KrakenClient(String currency, TickManager manager){
+        this.currency = currency;
         this.tickManager = manager;
     }
 
@@ -79,7 +81,7 @@ public class KrakenClient implements Client {
             client.connectBlocking(10, TimeUnit.SECONDS);
 
             JSONArray pairs = new JSONArray();
-            pairs.put("ADA/USD");
+            pairs.put(currency+"/USD");
 
             JSONObject subscription = new JSONObject();
             subscription.put("name", "ticker");

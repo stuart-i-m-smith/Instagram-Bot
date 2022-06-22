@@ -15,8 +15,11 @@ import java.util.concurrent.TimeUnit;
 public class GateIoClient implements Client {
 
     private final TickManager tickManager;
+    private final String currency;
 
-    public GateIoClient(TickManager manager){
+    public GateIoClient(String currency,
+                        TickManager manager){
+        this.currency = currency;
         this.tickManager = manager;
     }
 
@@ -30,6 +33,7 @@ public class GateIoClient implements Client {
 
                 @Override
                 public void onMessage(String message) {
+                    System.out.println(message);
                     JSONObject json = new JSONObject(message);
 
                     if(json.has("method") && "depth.update".equals(json.getString("method"))){
@@ -108,7 +112,7 @@ public class GateIoClient implements Client {
             client.connectBlocking(10, TimeUnit.SECONDS);
 
             JSONArray btcUsd = new JSONArray();
-            btcUsd.put("ADA_USDT");
+            btcUsd.put(currency+"_USDT");
             btcUsd.put(5);
             btcUsd.put("0.01");
 
