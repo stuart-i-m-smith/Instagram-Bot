@@ -32,7 +32,6 @@ public class BinanceFuturesClient implements Client {
 
             @Override
             public void onReceive(String message) {
-                System.out.println(message);
                 JSONObject json = new JSONObject(message);
 
                 double bid = json.getDouble("b");

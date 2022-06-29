@@ -33,7 +33,6 @@ public class BybitClient implements Client {
 
                 @Override
                 public void onMessage(String message) {
-                    System.out.println(message);
                     JSONObject json = new JSONObject(message);
 
                     if(!json.has("data")){
@@ -72,7 +71,7 @@ public class BybitClient implements Client {
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("closed connection");
+                    System.out.println("Bybit closed connection");
                 }
 
                 @Override

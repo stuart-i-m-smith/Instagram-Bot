@@ -75,7 +75,7 @@ public class BitstampClient implements Client {
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("closed connection");
+                    System.out.println("Bitstamp closed connection");
                 }
 
                 @Override

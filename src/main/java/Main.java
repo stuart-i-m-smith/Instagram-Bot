@@ -31,18 +31,19 @@ public class Main {
         BybitClient bybitClient = new BybitClient(currency, tickManager);
         BybitFuturesClient bybitFuturesClient = new BybitFuturesClient(currency, futuresTickManager);
 
-        //coinbaseClient.connect();
-//        ftxClient.connect();
-//        krakenClient.connect();
-//        bitstampClient.connect();
-//        gateIoClient.connect();
-//        binanceClient.connect();
-//        binanceFuturesClient.connect();
-//        bybitClient.connect();
+        coinbaseClient.connect();
+        ftxClient.connect();
+        krakenClient.connect();
+        bitstampClient.connect();
+        gateIoClient.connect();
+        binanceClient.connect();
+        bybitClient.connect();
         bybitFuturesClient.connect();
 
-        tickReporter.scheduleReport();
-        futuresTickReporter.scheduleReport();
+        //        binanceFuturesClient.connect();
+
+        tickReporter.scheduleReport("Spot", 14);
+        futuresTickReporter.scheduleReport("Futures", 15);
 
     }
 }

@@ -16,13 +16,12 @@ public class TickReporter implements TickObserver{
         latestTicks = allTicks;
     }
 
-    public void scheduleReport(){
+    public void scheduleReport(String tickType, int initialDelay){
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+                System.out.println("====== " + tickType + " ======");
                 for(Tick tick : latestTicks){
                     System.out.println(tick);
                 }
-
-                System.out.println("======");
-            }, 15, 60, TimeUnit.SECONDS);
+            }, initialDelay, 60, TimeUnit.SECONDS);
     }
 }

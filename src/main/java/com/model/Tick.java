@@ -50,7 +50,7 @@ public class Tick {
     public String toString() {
         return "{" +
                 "exchange='" + exchange + '\'' +
-                ", time=" + timestamp.getEpochSecond() +
+                ", time=" + timestamp +
                 ", bid=" + bid +
                 ", ask=" + ask +
                 '}';

@@ -10,14 +10,8 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.time.Instant;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class BybitFuturesClient implements Client {
 
@@ -41,7 +35,6 @@ public class BybitFuturesClient implements Client {
 
                 @Override
                 public void onMessage(String message) {
-                    System.out.println(message);
                     JSONObject json = new JSONObject(message);
 
                     if(!json.has("data")){
@@ -49,33 +42,105 @@ public class BybitFuturesClient implements Client {
                     }
 
                     JSONObject data = json.getJSONObject("data");
-                    JSONArray orderBook = data.getJSONArray("order_book");
 
-                    if(!orderBook.isEmpty()) {
+                    if(data.has("order_book")){
+
+                        JSONArray orderBook = data.getJSONArray("order_book");
+
+                        if(!orderBook.isEmpty()) {
+                            JSONObject bidPrice = null;
+                            JSONObject askPrice = null;
+
+                            for (int i = 0; i < orderBook.length(); i++) {
+
+                                JSONObject price = orderBook.getJSONObject(i);
+                                if ("Buy".equals(price.getString("side"))) {
+                                    bidPrice = price;
+                                }
+
+                                if ("Sell".equals(price.getString("side"))) {
+                                    askPrice = price;
+                                }
+
+                                if(askPrice != null){
+                                    break;
+                                }
+                            }
+
+                            double bid = bidPrice == null ? lastSpotBid : bidPrice.getDouble("price");
+                            double ask = askPrice == null ? lastSpotAsk : askPrice.getDouble("price");
+                            lastBidId = bidPrice == null ? lastBidId : bidPrice.getString("id");
+                            lastAskId = askPrice == null ? lastAskId : askPrice.getString("id");
+
+                            if (!Precision.equals(lastSpotBid, bid) ||
+                                    !Precision.equals(lastSpotAsk, ask)) {
+
+                                Tick tick = new Tick.Builder()
+                                        .exchange("bybit")
+                                        .timestamp(Instant.ofEpochMilli(json.getLong("timestamp_e6") / 1000))
+                                        .bid(bid)
+                                        .ask(ask)
+                                        .build();
+
+                                lastSpotBid = bid;
+                                lastSpotAsk = ask;
+
+                                tickManager.offer(tick);
+                            }
+                        }
+                    }
+
+                    if(data.has("delete")){
+                        JSONArray delete = data.getJSONArray("delete");
+
+                        for (int i = 0; i < delete.length(); i++) {
+
+                            JSONObject price = delete.getJSONObject(i);
+                            if ("Buy".equals(price.getString("side")) && price.getString("id").equals(lastBidId)) {
+                                lastBidId = null;
+                                lastSpotBid = 0;
+                            }
+
+                            if ("Sell".equals(price.getString("side")) && price.getString("id").equals(lastAskId)) {
+                                lastAskId = null;
+                                lastSpotAsk = Double.MAX_VALUE;
+                            }
+                        }
+                    }
+
+                    if(data.has("update")){
+                        JSONArray update = data.getJSONArray("update");
+
                         JSONObject bidPrice = null;
                         JSONObject askPrice = null;
 
-                        for(int i=0;i<orderBook.length();i++){
+                        for (int i = 0; i < update.length(); i++) {
 
-                            JSONObject price = orderBook.getJSONObject(i);
-                            if("Buy".equals(price.getString("side")) && askPrice == null){
-                                askPrice = price;
+                            JSONObject price = update.getJSONObject(i);
+                            if ("Buy".equals(price.getString("side")) && price.getDouble("price") > lastSpotBid) {
+                                bidPrice = price;
                             }
 
-                            if("Sell".equals(price.getString("side"))){
-                                bidPrice = price;
+                            if ("Sell".equals(price.getString("side")) && price.getDouble("price") < lastSpotAsk) {
+                                if(lastSpotAsk == Double.MAX_VALUE){
+                                    lastSpotAsk = price.getDouble("price");
+                                }
+
+                                askPrice = price;
                             }
                         }
 
                         double bid = bidPrice == null ? lastSpotBid : bidPrice.getDouble("price");
                         double ask = askPrice == null ? lastSpotAsk : askPrice.getDouble("price");
+                        lastBidId = bidPrice == null ? lastBidId : bidPrice.getString("id");
+                        lastAskId = askPrice == null ? lastAskId : askPrice.getString("id");
 
                         if (!Precision.equals(lastSpotBid, bid) ||
                             !Precision.equals(lastSpotAsk, ask)) {
 
                             Tick tick = new Tick.Builder()
                                     .exchange("bybit")
-                                    .timestamp(Instant.ofEpochMilli(json.getLong("timestamp_e6")/1000))
+                                    .timestamp(Instant.ofEpochMilli(json.getLong("timestamp_e6") / 1000))
                                     .bid(bid)
                                     .ask(ask)
                                     .build();
@@ -90,12 +155,12 @@ public class BybitFuturesClient implements Client {
 
                 @Override
                 public void onOpen(ServerHandshake serverHandshake) {
-                    System.out.println("Connected to Bybit.");
+                    System.out.println("Connected to Bybit Futures.");
                 }
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("closed connection");
+                    System.out.println("Bybit Futures closed connection");
                 }
 
                 @Override
