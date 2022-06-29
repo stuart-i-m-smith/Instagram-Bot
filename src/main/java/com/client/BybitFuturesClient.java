@@ -10,8 +10,14 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.time.Instant;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class BybitFuturesClient implements Client {
 
@@ -30,6 +36,8 @@ public class BybitFuturesClient implements Client {
 
                 private volatile double lastSpotBid = 0;
                 private volatile double lastSpotAsk = 0;
+                private volatile String lastBidId = null;
+                private volatile String lastAskId = null;
 
                 @Override
                 public void onMessage(String message) {
@@ -41,29 +49,42 @@ public class BybitFuturesClient implements Client {
                     }
 
                     JSONObject data = json.getJSONObject("data");
+                    JSONArray orderBook = data.getJSONArray("order_book");
 
+                    if(!orderBook.isEmpty()) {
+                        JSONObject bidPrice = null;
+                        JSONObject askPrice = null;
 
+                        for(int i=0;i<orderBook.length();i++){
 
-                    JSONArray bids = data.getJSONArray("b");
-                    JSONArray asks = data.getJSONArray("a");
+                            JSONObject price = orderBook.getJSONObject(i);
+                            if("Buy".equals(price.getString("side")) && askPrice == null){
+                                askPrice = price;
+                            }
 
-                    double bid = bids.length() == 0 ? lastSpotBid : bids.getJSONArray(0).getDouble(0);
-                    double ask = asks.length() == 0 ? lastSpotAsk : asks.getJSONArray(0).getDouble(0);
+                            if("Sell".equals(price.getString("side"))){
+                                bidPrice = price;
+                            }
+                        }
 
-                    if (!Precision.equals(lastSpotBid, bid) ||
-                        !Precision.equals(lastSpotAsk, ask)) {
+                        double bid = bidPrice == null ? lastSpotBid : bidPrice.getDouble("price");
+                        double ask = askPrice == null ? lastSpotAsk : askPrice.getDouble("price");
 
-                        Tick tick = new Tick.Builder()
-                                .exchange("bybit")
-                                .timestamp(Instant.ofEpochMilli(data.getLong("t")))
-                                .bid(bid)
-                                .ask(ask)
-                                .build();
+                        if (!Precision.equals(lastSpotBid, bid) ||
+                            !Precision.equals(lastSpotAsk, ask)) {
 
-                        lastSpotBid = bid;
-                        lastSpotAsk = ask;
+                            Tick tick = new Tick.Builder()
+                                    .exchange("bybit")
+                                    .timestamp(Instant.ofEpochMilli(json.getLong("timestamp_e6")/1000))
+                                    .bid(bid)
+                                    .ask(ask)
+                                    .build();
 
-                        tickManager.offer(tick);
+                            lastSpotBid = bid;
+                            lastSpotAsk = ask;
+
+                            tickManager.offer(tick);
+                        }
                     }
                 }
 
