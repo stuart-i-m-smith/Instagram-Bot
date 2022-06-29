@@ -1,4 +1,4 @@
-package com.client;
+package com.client.websocket;
 
 import com.tick.TickManager;
 import com.model.Tick;

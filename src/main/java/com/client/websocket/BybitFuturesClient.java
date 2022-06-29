@@ -1,4 +1,4 @@
-package com.client;
+package com.client.websocket;
 
 import com.model.Tick;
 import com.tick.TickManager;
@@ -179,6 +179,8 @@ public class BybitFuturesClient implements Client {
             subscribeMessage.put("args", args);
 
             client.send(subscribeMessage.toString());
+
+            //'{"op": "subscribe", "args": ["instrument_info.100ms.BTCUSDT"]}'
 
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(
                     () -> client.send("{'op': 'ping'}"),

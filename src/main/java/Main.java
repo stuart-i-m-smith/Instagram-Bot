@@ -1,7 +1,8 @@
+import com.client.rest.FtxRestClient;
+import com.client.websocket.*;
 import com.tick.TickArbitrageDetector;
 import com.tick.TickManager;
 import com.tick.TickReporter;
-import com.client.*;
 
 public class Main {
 
@@ -23,6 +24,7 @@ public class Main {
 
         CoinbaseClient coinbaseClient = new CoinbaseClient(currency, tickManager);
         FtxClient ftxClient = new FtxClient(currency, tickManager, futuresTickManager);
+        FtxRestClient ftxRestClient = new FtxRestClient(currency);
         KrakenClient krakenClient = new KrakenClient(currency, tickManager);
         BitstampClient bitstampClient = new BitstampClient(currency, tickManager);
         GateIoClient gateIoClient = new GateIoClient(currency, tickManager);
@@ -31,14 +33,15 @@ public class Main {
         BybitClient bybitClient = new BybitClient(currency, tickManager);
         BybitFuturesClient bybitFuturesClient = new BybitFuturesClient(currency, futuresTickManager);
 
-        coinbaseClient.connect();
-        ftxClient.connect();
-        krakenClient.connect();
-        bitstampClient.connect();
-        gateIoClient.connect();
-        binanceClient.connect();
-        bybitClient.connect();
-        bybitFuturesClient.connect();
+//        coinbaseClient.connect();
+//        ftxClient.connect();
+        ftxRestClient.connect();
+//        krakenClient.connect();
+//        bitstampClient.connect();
+//        gateIoClient.connect();
+//        binanceClient.connect();
+//        bybitClient.connect();
+//        bybitFuturesClient.connect();
 
         //        binanceFuturesClient.connect();
 

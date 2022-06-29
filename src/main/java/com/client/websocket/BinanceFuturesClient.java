@@ -1,20 +1,20 @@
-package com.client;
+package com.client.websocket;
 
-import com.tick.TickManager;
 import com.binance.connector.client.impl.WebsocketClientImpl;
 import com.binance.connector.client.utils.WebSocketCallback;
 import com.model.Tick;
+import com.tick.TickManager;
 import org.apache.commons.math3.util.Precision;
 import org.json.JSONObject;
 
 import java.time.Instant;
 
-public class BinanceClient implements Client {
+public class BinanceFuturesClient implements Client {
 
     private final String currency;
     private final TickManager tickManager;
 
-    public BinanceClient(String currency, TickManager manager){
+    public BinanceFuturesClient(String currency, TickManager manager){
         this.currency = currency;
         this.tickManager = manager;
     }
@@ -22,11 +22,11 @@ public class BinanceClient implements Client {
     @Override
     public void connect() {
 
-        WebsocketClientImpl client = new WebsocketClientImpl();
+        WebsocketClientImpl client = new WebsocketClientImpl("wss://fstream.binance.com");
 
-        System.out.println("Connected to Binance.");
+        System.out.println("Connected to Binance Futures.");
 
-        client.bookTicker(currency + "usdt", new WebSocketCallback() {
+        client.bookTicker(currency+"usdt", new WebSocketCallback() {
             private volatile double lastBid = 0;
             private volatile double lastAsk = 0;
 
