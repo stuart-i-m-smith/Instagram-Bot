@@ -1,5 +1,6 @@
 package com.client.websocket;
 
+import com.TickEventProcessor;
 import com.model.Tick;
 import com.tick.TickManager;
 import org.apache.commons.math3.util.Precision;
@@ -16,11 +17,11 @@ import java.util.concurrent.TimeUnit;
 public class BybitClient implements Client {
 
     private final String currency;
-    private final TickManager tickManager;
+    private final TickEventProcessor tickEventProcessor;
 
-    public BybitClient(String currency, TickManager tickManager){
+    public BybitClient(String currency, TickEventProcessor tickEventProcessor){
         this.currency = currency;
-        this.tickManager = tickManager;
+        this.tickEventProcessor = tickEventProcessor;
     }
 
     @Override
@@ -60,7 +61,7 @@ public class BybitClient implements Client {
                         lastSpotBid = bid;
                         lastSpotAsk = ask;
 
-                        tickManager.offer(tick);
+                        tickEventProcessor.publishTick(tick);
                     }
                 }
 

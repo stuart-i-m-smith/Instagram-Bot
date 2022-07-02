@@ -1,19 +1,21 @@
 package com.tick;
 
 import com.model.Tick;
+import com.model.TickEvent;
+import com.model.TickEventHandler;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class TickReporter implements TickObserver{
+public class TickReporter implements TickEventHandler {
 
-    private volatile Collection<Tick> latestTicks = Collections.emptyList();
+    private final Collection<Tick> latestTicks = new CopyOnWriteArrayList<>();
 
     @Override
-    public void onTickEvent(Tick tickEvent, Collection<Tick> allTicks) {
-        latestTicks = allTicks;
+    public void onEvent(TickEvent tickEvent, long l, boolean b) {
+        latestTicks.add(tickEvent.getTick());
     }
 
     public void scheduleReport(String tickType, int initialDelay){

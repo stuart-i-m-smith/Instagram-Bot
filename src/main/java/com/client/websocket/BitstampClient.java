@@ -1,6 +1,6 @@
 package com.client.websocket;
 
-import com.tick.TickManager;
+import com.TickEventProcessor;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
@@ -15,11 +15,11 @@ import java.util.concurrent.TimeUnit;
 public class BitstampClient implements Client {
 
     private final String currency;
-    private final TickManager tickManager;
+    private final TickEventProcessor tickEventProcessor;
 
-    public BitstampClient(String currency, TickManager manager){
+    public BitstampClient(String currency, TickEventProcessor tickEventProcessor){
         this.currency = currency;
-        this.tickManager = manager;
+        this.tickEventProcessor = tickEventProcessor;
     }
 
     @Override
@@ -62,7 +62,7 @@ public class BitstampClient implements Client {
                                 lastBid = tick.getBid();
                                 lastAsk = tick.getAsk();
 
-                                tickManager.offer(tick);
+                                tickEventProcessor.publishTick(tick);
                             }
                         }
                     }

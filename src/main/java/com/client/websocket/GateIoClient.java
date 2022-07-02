@@ -1,5 +1,6 @@
 package com.client.websocket;
 
+import com.TickEventProcessor;
 import com.tick.TickManager;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
@@ -14,13 +15,13 @@ import java.util.concurrent.TimeUnit;
 
 public class GateIoClient implements Client {
 
-    private final TickManager tickManager;
     private final String currency;
+    private final TickEventProcessor tickEventProcessor;
 
     public GateIoClient(String currency,
-                        TickManager manager){
+                        TickEventProcessor tickEventProcessor){
         this.currency = currency;
-        this.tickManager = manager;
+        this.tickEventProcessor = tickEventProcessor;
     }
 
     @Override
@@ -86,7 +87,7 @@ public class GateIoClient implements Client {
                             Tick tick = tickBuilder.build();
 
                             if(isUpdated) {
-                                tickManager.offer(tick);
+                                tickEventProcessor.publishTick(tick);
                             }
                         }
                     }

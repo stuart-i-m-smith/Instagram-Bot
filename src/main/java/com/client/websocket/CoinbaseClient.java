@@ -1,5 +1,6 @@
 package com.client.websocket;
 
+import com.TickEventProcessor;
 import com.tick.TickManager;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
@@ -15,11 +16,11 @@ import java.util.concurrent.TimeUnit;
 public class CoinbaseClient implements Client {
 
     private final String currency;
-    private final TickManager tickManager;
+    private final TickEventProcessor tickEventProcessor;
 
-    public CoinbaseClient(String currency, TickManager manager){
+    public CoinbaseClient(String currency, TickEventProcessor tickEventProcessor){
         this.currency = currency;
-        this.tickManager = manager;
+        this.tickEventProcessor = tickEventProcessor;
     }
 
     @Override
@@ -54,7 +55,7 @@ public class CoinbaseClient implements Client {
                             lastBid = bid;
                             lastAsk = ask;
 
-                            tickManager.offer(tick);
+                            tickEventProcessor.publishTick(tick);
                         }
                     }
                 }

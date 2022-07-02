@@ -1,5 +1,6 @@
 package com.client.websocket;
 
+import com.TickEventProcessor;
 import com.tick.TickManager;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
@@ -16,11 +17,11 @@ import java.util.concurrent.TimeUnit;
 public class KrakenClient implements Client {
 
     private final String currency;
-    private final TickManager tickManager;
+    private final TickEventProcessor tickEventProcessor;
 
-    public KrakenClient(String currency, TickManager manager){
+    public KrakenClient(String currency, TickEventProcessor tickEventProcessor){
         this.currency = currency;
-        this.tickManager = manager;
+        this.tickEventProcessor = tickEventProcessor;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class KrakenClient implements Client {
                             lastBid = bid;
                             lastAsk = ask;
 
-                            tickManager.offer(tick);
+                            tickEventProcessor.publishTick(tick);
                         }
                     }
                 }

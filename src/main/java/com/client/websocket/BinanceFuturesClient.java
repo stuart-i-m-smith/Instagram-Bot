@@ -1,7 +1,9 @@
 package com.client.websocket;
 
+import com.TickEventProcessor;
 import com.binance.connector.client.impl.WebsocketClientImpl;
 import com.binance.connector.client.utils.WebSocketCallback;
+import com.model.Product;
 import com.model.Tick;
 import com.tick.TickManager;
 import org.apache.commons.math3.util.Precision;
@@ -12,11 +14,11 @@ import java.time.Instant;
 public class BinanceFuturesClient implements Client {
 
     private final String currency;
-    private final TickManager tickManager;
+    private final TickEventProcessor tickEventProcessor;
 
-    public BinanceFuturesClient(String currency, TickManager manager){
+    public BinanceFuturesClient(String currency, TickEventProcessor tickEventProcessor){
         this.currency = currency;
-        this.tickManager = manager;
+        this.tickEventProcessor = tickEventProcessor;
     }
 
     @Override
@@ -42,6 +44,7 @@ public class BinanceFuturesClient implements Client {
 
                     Tick tick = new Tick.Builder()
                             .exchange("binance")
+                            .product(Product.Future)
                             .timestamp(Instant.now())
                             .bid(bid)
                             .ask(ask)
@@ -50,7 +53,7 @@ public class BinanceFuturesClient implements Client {
                     lastBid = bid;
                     lastAsk = ask;
 
-                    tickManager.offer(tick);
+                    tickEventProcessor.publishTick(tick);
                 }
             }
         });

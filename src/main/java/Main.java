@@ -1,52 +1,36 @@
+import com.OrderBookManager;
+import com.TickEventProcessor;
 import com.client.rest.FtxRestClient;
 import com.client.websocket.*;
-import com.tick.TickArbitrageDetector;
-import com.tick.TickManager;
-import com.tick.TickReporter;
 
 public class Main {
 
     public static void main(String[] args) {
         String currency = "SOL";
 
-        TickManager tickManager = new TickManager();
-        TickManager futuresTickManager = new TickManager();
+        TickEventProcessor processor = new TickEventProcessor();
+        processor.start(new OrderBookManager());
 
-        TickReporter tickReporter = new TickReporter();
-        TickReporter futuresTickReporter = new TickReporter();
-
-        TickArbitrageDetector tickArbitrageDetector = new TickArbitrageDetector();
-
-        tickManager.addTickObserver(tickReporter);
-        //tickManager.addTickObserver(tickArbitrageDetector);
-
-        futuresTickManager.addTickObserver(futuresTickReporter);
-
-        CoinbaseClient coinbaseClient = new CoinbaseClient(currency, tickManager);
-        FtxClient ftxClient = new FtxClient(currency, tickManager, futuresTickManager);
+        CoinbaseClient coinbaseClient = new CoinbaseClient(currency, processor);
+        FtxClient ftxClient = new FtxClient(currency, processor);
         FtxRestClient ftxRestClient = new FtxRestClient(currency);
-        KrakenClient krakenClient = new KrakenClient(currency, tickManager);
-        BitstampClient bitstampClient = new BitstampClient(currency, tickManager);
-        GateIoClient gateIoClient = new GateIoClient(currency, tickManager);
-        BinanceClient binanceClient = new BinanceClient(currency, tickManager);
-        BinanceFuturesClient binanceFuturesClient = new BinanceFuturesClient(currency, futuresTickManager);
-        BybitClient bybitClient = new BybitClient(currency, tickManager);
-        BybitFuturesClient bybitFuturesClient = new BybitFuturesClient(currency, futuresTickManager);
+        KrakenClient krakenClient = new KrakenClient(currency, processor);
+        BitstampClient bitstampClient = new BitstampClient(currency, processor);
+        GateIoClient gateIoClient = new GateIoClient(currency, processor);
+        BinanceClient binanceClient = new BinanceClient(currency, processor);
+        BinanceFuturesClient binanceFuturesClient = new BinanceFuturesClient(currency, processor);
+        BybitClient bybitClient = new BybitClient(currency, processor);
+        BybitFuturesClient bybitFuturesClient = new BybitFuturesClient(currency, processor);
 
-//        coinbaseClient.connect();
-//        ftxClient.connect();
+        coinbaseClient.connect();
+        ftxClient.connect();
         ftxRestClient.connect();
-//        krakenClient.connect();
-//        bitstampClient.connect();
-//        gateIoClient.connect();
-//        binanceClient.connect();
-//        bybitClient.connect();
-//        bybitFuturesClient.connect();
-
-        //        binanceFuturesClient.connect();
-
-        tickReporter.scheduleReport("Spot", 14);
-        futuresTickReporter.scheduleReport("Futures", 15);
-
+        krakenClient.connect();
+        bitstampClient.connect();
+        gateIoClient.connect();
+        binanceClient.connect();
+        bybitClient.connect();
+        bybitFuturesClient.connect();
+        binanceFuturesClient.connect();
     }
 }

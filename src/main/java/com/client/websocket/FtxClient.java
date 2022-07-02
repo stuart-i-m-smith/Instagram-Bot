@@ -1,6 +1,7 @@
 package com.client.websocket;
 
-import com.tick.TickManager;
+import com.TickEventProcessor;
+import com.model.Product;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
@@ -16,13 +17,11 @@ import java.util.concurrent.TimeUnit;
 public class FtxClient implements Client {
 
     private final String currency;
-    private final TickManager tickManager;
-    private final TickManager futuresTickManager;
+    private final TickEventProcessor tickEventProcessor;
 
-    public FtxClient(String currency, TickManager tickManager, TickManager futuresTickManager){
+    public FtxClient(String currency, TickEventProcessor tickEventProcessor){
         this.currency = currency;
-        this.tickManager = tickManager;
-        this.futuresTickManager = futuresTickManager;
+        this.tickEventProcessor = tickEventProcessor;
     }
 
     @Override
@@ -62,6 +61,7 @@ public class FtxClient implements Client {
 
                                     Tick tick = new Tick.Builder()
                                             .exchange("ftx")
+                                            .product(Product.Spot)
                                             .timestamp(Instant.ofEpochMilli(((Number) data.getDouble("time")).longValue() * 1000))
                                             .bid(bid)
                                             .ask(ask)
@@ -70,7 +70,7 @@ public class FtxClient implements Client {
                                     lastSpotBid = bid;
                                     lastSpotAsk = ask;
 
-                                    tickManager.offer(tick);
+                                    tickEventProcessor.publishTick(tick);
                                 }
                             }else{
 
@@ -82,6 +82,7 @@ public class FtxClient implements Client {
 
                                     Tick tick = new Tick.Builder()
                                             .exchange("ftx")
+                                            .product(Product.Future)
                                             .timestamp(Instant.ofEpochMilli(((Number) data.getDouble("time")).longValue() * 1000))
                                             .bid(bid)
                                             .ask(ask)
@@ -90,7 +91,7 @@ public class FtxClient implements Client {
                                     lastFutureBid = bid;
                                     lastFutureAsk = ask;
 
-                                    futuresTickManager.offer(tick);
+                                    tickEventProcessor.publishTick(tick);
                                 }
                             }
                         }
