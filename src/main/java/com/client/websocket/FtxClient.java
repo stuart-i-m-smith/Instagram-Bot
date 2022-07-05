@@ -29,10 +29,10 @@ public class FtxClient implements Client {
         try {
             WebSocketClient client = new WebSocketClient(new URI("wss://ftx.com/ws/")) {
 
-                private volatile double lastSpotBid = 0;
-                private volatile double lastSpotAsk = 0;
-                private volatile double lastFutureBid = 0;
-                private volatile double lastFutureAsk = 0;
+                private  double lastSpotBid = 0;
+                private  double lastSpotAsk = 0;
+                private  double lastFutureBid = 0;
+                private  double lastFutureAsk = 0;
 
                 @Override
                 public void onMessage(String message) {

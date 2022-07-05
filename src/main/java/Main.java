@@ -1,15 +1,22 @@
-import com.OrderBookManager;
+import com.orderbook.Book;
 import com.TickEventProcessor;
 import com.client.rest.FtxRestClient;
 import com.client.websocket.*;
+import com.orderbook.BookReporter;
+
+import static com.model.Product.Future;
+import static com.model.Product.Spot;
 
 public class Main {
 
     public static void main(String[] args) {
         String currency = "SOL";
 
+        Book spotBook = new Book(Spot);
+        Book futureBook = new Book(Future);
+
         TickEventProcessor processor = new TickEventProcessor();
-        processor.start(new OrderBookManager());
+        processor.start(spotBook, futureBook);
 
         CoinbaseClient coinbaseClient = new CoinbaseClient(currency, processor);
         FtxClient ftxClient = new FtxClient(currency, processor);
@@ -32,5 +39,11 @@ public class Main {
         bybitClient.connect();
         bybitFuturesClient.connect();
         binanceFuturesClient.connect();
+
+        BookReporter spotBookReporter = new BookReporter(spotBook);
+        spotBookReporter.scheduleReport(5);
+
+        BookReporter futureBookReporter = new BookReporter(futureBook);
+        futureBookReporter.scheduleReport(8);
     }
 }

@@ -5,7 +5,6 @@ import com.binance.connector.client.impl.WebsocketClientImpl;
 import com.binance.connector.client.utils.WebSocketCallback;
 import com.model.Product;
 import com.model.Tick;
-import com.tick.TickManager;
 import org.apache.commons.math3.util.Precision;
 import org.json.JSONObject;
 
@@ -29,8 +28,8 @@ public class BinanceFuturesClient implements Client {
         System.out.println("Connected to Binance Futures.");
 
         client.bookTicker(currency+"usdt", new WebSocketCallback() {
-            private volatile double lastBid = 0;
-            private volatile double lastAsk = 0;
+            private  double lastBid = 0;
+            private  double lastAsk = 0;
 
             @Override
             public void onReceive(String message) {

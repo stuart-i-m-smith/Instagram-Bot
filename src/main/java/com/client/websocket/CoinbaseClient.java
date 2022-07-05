@@ -1,7 +1,6 @@
 package com.client.websocket;
 
 import com.TickEventProcessor;
-import com.tick.TickManager;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
@@ -29,8 +28,8 @@ public class CoinbaseClient implements Client {
         try {
             WebSocketClient client = new WebSocketClient(new URI("wss://ws-feed.exchange.coinbase.com")) {
 
-                private volatile double lastBid = 0;
-                private volatile double lastAsk = 0;
+                private  double lastBid = 0;
+                private  double lastAsk = 0;
 
                 @Override
                 public void onMessage(String message) {

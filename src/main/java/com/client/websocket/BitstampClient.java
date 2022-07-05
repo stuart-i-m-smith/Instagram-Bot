@@ -27,8 +27,8 @@ public class BitstampClient implements Client {
         try {
             WebSocketClient client = new WebSocketClient(new URI("wss://ws.bitstamp.net")) {
 
-                private volatile double lastBid = 0;
-                private volatile double lastAsk = 0;
+                private  double lastBid = 0;
+                private  double lastAsk = 0;
 
                 @Override
                 public void onMessage(String message) {

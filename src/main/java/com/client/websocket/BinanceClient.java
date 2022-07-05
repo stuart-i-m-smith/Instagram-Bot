@@ -27,8 +27,8 @@ public class BinanceClient implements Client {
         System.out.println("Connected to Binance.");
 
         client.bookTicker(currency + "usdt", new WebSocketCallback() {
-            private volatile double lastBid = 0;
-            private volatile double lastAsk = 0;
+            private double lastBid = 0;
+            private double lastAsk = 0;
 
             @Override
             public void onReceive(String message) {

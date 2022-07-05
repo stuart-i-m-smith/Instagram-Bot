@@ -3,7 +3,6 @@ package com.client.websocket;
 import com.TickEventProcessor;
 import com.model.Product;
 import com.model.Tick;
-import com.tick.TickManager;
 import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -30,10 +29,10 @@ public class BybitFuturesClient implements Client {
         try {
             WebSocketClient client = new WebSocketClient(new URI("wss://stream.bybit.com/realtime_public")) {
 
-                private volatile double lastSpotBid = 0;
-                private volatile double lastSpotAsk = 0;
-                private volatile String lastBidId = null;
-                private volatile String lastAskId = null;
+                private double lastSpotBid = 0;
+                private double lastSpotAsk = 0;
+                private String lastBidId = null;
+                private String lastAskId = null;
 
                 @Override
                 public void onMessage(String message) {
