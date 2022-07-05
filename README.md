@@ -9,3 +9,4 @@ Retrieves multiple street prices and collates an aggregated book of prices.
 - Aggregate entire book not just BBO
 - Store funding rates
 - Java FX UI
+- Other ideas welcome!
