@@ -11,14 +11,18 @@ public class Tick {
     private final Product product;
     private final Instant timestamp;
     private final double bid;
+    private final double bidSize;
     private final double ask;
+    private final double askSize;
 
     private Tick(Builder builder) {
         exchange = builder.exchange;
         product = builder.product;
         timestamp = builder.timestamp;
         bid = builder.bid;
+        bidSize = builder.bidSize;
         ask = builder.ask;
+        askSize = builder.askSize;
     }
 
     public String getExchange() {
@@ -41,17 +45,25 @@ public class Tick {
         return ask;
     }
 
+    public double getBidSize() {
+        return bidSize;
+    }
+
+    public double getAskSize() {
+        return askSize;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Tick tick = (Tick) o;
-        return Double.compare(tick.bid, bid) == 0 && Double.compare(tick.ask, ask) == 0 && Objects.equals(exchange, tick.exchange) && product == tick.product && Objects.equals(timestamp, tick.timestamp);
+        return Double.compare(tick.bidSize, bidSize) == 0 && Double.compare(tick.askSize, askSize) == 0 &&Double.compare(tick.bid, bid) == 0 && Double.compare(tick.ask, ask) == 0 && Objects.equals(exchange, tick.exchange) && product == tick.product && Objects.equals(timestamp, tick.timestamp);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(exchange, product, timestamp, bid, ask);
+        return Objects.hash(exchange, product, timestamp, bid, ask, bidSize, askSize);
     }
 
     @Override
@@ -61,7 +73,9 @@ public class Tick {
                 ", product=" + product +
                 ", time=" + timestamp +
                 ", bid=" + bid +
+                ", bidSize=" + bidSize +
                 ", ask=" + ask +
+                ", askSize=" + askSize +
                 '}';
     }
 
@@ -71,6 +85,8 @@ public class Tick {
         private Instant timestamp;
         private double bid;
         private double ask;
+        private double bidSize;
+        private double askSize;
 
         public Builder() {
         }
@@ -97,6 +113,16 @@ public class Tick {
 
         public Builder ask(double ask) {
             this.ask = ask;
+            return this;
+        }
+
+        public Builder bidSize(double bidSize) {
+            this.bidSize = bidSize;
+            return this;
+        }
+
+        public Builder askSize(double askSize) {
+            this.askSize = askSize;
             return this;
         }
 

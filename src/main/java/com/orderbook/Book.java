@@ -11,8 +11,8 @@ public class Book implements TickEventHandler {
 
     private final Product product;
 
-    private final Set<Tick> bids = new TreeSet<>(new BookTickComparator(Tick::getBid).reversed());
-    private final Set<Tick> asks = new TreeSet<>(new BookTickComparator(Tick::getAsk));
+    private final Set<Tick> bids = new TreeSet<>(new BookTickComparator(Tick::getBid, Tick::getBidSize).reversed());
+    private final Set<Tick> asks = new TreeSet<>(new BookTickComparator(Tick::getAsk, Tick::getAskSize));
 
     public Book(Product product){
         this.product = product;

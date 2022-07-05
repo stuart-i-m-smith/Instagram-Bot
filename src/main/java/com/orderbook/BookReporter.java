@@ -34,19 +34,21 @@ public class BookReporter {
 
             for(int counter = 0; counter < length; counter++){
                 LOGGER.info(
-                        getString(bids, counter, Tick::getBid)
+                        getString(bids, counter, Tick::getBid, Tick::getBidSize)
                          +" ::: "+
-                        getString(asks, counter, Tick::getAsk));
+                        getString(asks, counter, Tick::getAsk, Tick::getAskSize));
             }
         }, initialDelay, 60, TimeUnit.SECONDS);
     }
 
-    private String getString(List<Tick> ticks, int index, Function<Tick, Double> priceFunction){
+    private String getString(List<Tick> ticks, int index, Function<Tick, Double> priceFunction, Function<Tick, Double> sizeFunction){
 
         if(ticks.size() <= index){
             return "";
         }
 
-        return ticks.get(index).getExchange() +"-"+ DECIMAL_FORMAT.format(priceFunction.apply(ticks.get(index)));
+        return ticks.get(index).getExchange() +"-"+
+                DECIMAL_FORMAT.format(priceFunction.apply(ticks.get(index)))
+                +"["+ DECIMAL_FORMAT.format(sizeFunction.apply(ticks.get(index))) +"]";
     }
 }
