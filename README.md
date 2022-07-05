@@ -7,4 +7,5 @@ Retrieves multiple street prices and collates an aggregated book of prices.
 - Multiple pairs
 - Add sizes
 - Aggregate entire book not just BBO
+- Store funding rates
 - Java FX UI
