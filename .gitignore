@@ -1,0 +1,13 @@
+.gradle/*
+build/*
+/build/
+/.gradle/
+logs/*
+/logs/
+target/*
+/target/
+/.idea/*/
+!.idea/runConfigurations/
+!.idea/runConfigurations/**
+!.idea/*.xml
+.idea/*
