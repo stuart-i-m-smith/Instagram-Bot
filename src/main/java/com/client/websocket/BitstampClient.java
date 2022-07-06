@@ -6,13 +6,18 @@ import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class BitstampClient implements Client {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final String currency;
     private final TickEventProcessor tickEventProcessor;
@@ -27,8 +32,10 @@ public class BitstampClient implements Client {
         try {
             WebSocketClient client = new WebSocketClient(new URI("wss://ws.bitstamp.net")) {
 
-                private  double lastBid = 0;
-                private  double lastAsk = 0;
+                private double lastBid = 0;
+                private double lastAsk = 0;
+                private double lastBidSize = 0;
+                private double lastAskSize = 0;
 
                 @Override
                 public void onMessage(String message) {
@@ -46,21 +53,33 @@ public class BitstampClient implements Client {
                                 tickBuilder.bid(data.getJSONArray("bids")
                                     .getJSONArray(0)
                                     .getDouble(0));
+
+                                tickBuilder.bidSize(data.getJSONArray("bids")
+                                        .getJSONArray(0)
+                                        .getDouble(1));
                             }
 
                             if(data.has("asks")){
                                 tickBuilder.ask(data.getJSONArray("asks")
                                     .getJSONArray(0)
                                     .getDouble(0));
+
+                                tickBuilder.askSize(data.getJSONArray("asks")
+                                        .getJSONArray(0)
+                                        .getDouble(1));
                             }
 
                             Tick tick = tickBuilder.build();
 
                             if(!Precision.equals(lastBid, tick.getBid()) ||
-                                !Precision.equals(lastAsk, tick.getAsk())) {
+                                !Precision.equals(lastAsk, tick.getAsk()) ||
+                                !Precision.equals(lastBidSize, tick.getBidSize()) ||
+                                !Precision.equals(lastAskSize, tick.getAskSize())) {
 
                                 lastBid = tick.getBid();
                                 lastAsk = tick.getAsk();
+                                lastBidSize = tick.getBidSize();
+                                lastAskSize = tick.getAskSize();
 
                                 tickEventProcessor.publishTick(tick);
                             }
@@ -70,12 +89,12 @@ public class BitstampClient implements Client {
 
                 @Override
                 public void onOpen(ServerHandshake serverHandshake) {
-                    System.out.println("Connected to Bistamp.");
+                    LOGGER.info("Connected to Bistamp.");
                 }
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("Bitstamp closed connection");
+                    LOGGER.info("Bitstamp closed connection");
                 }
 
                 @Override

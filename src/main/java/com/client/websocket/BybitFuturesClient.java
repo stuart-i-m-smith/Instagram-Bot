@@ -8,13 +8,18 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class BybitFuturesClient implements Client {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final String currency;
     private final TickEventProcessor tickEventProcessor;
@@ -29,8 +34,10 @@ public class BybitFuturesClient implements Client {
         try {
             WebSocketClient client = new WebSocketClient(new URI("wss://stream.bybit.com/realtime_public")) {
 
-                private double lastSpotBid = 0;
-                private double lastSpotAsk = 0;
+                private double lastBid = 0;
+                private double lastAsk = 0;
+                private double lastBidSize = 0;
+                private double lastAskSize = 0;
                 private String lastBidId = null;
                 private String lastAskId = null;
 
@@ -68,23 +75,31 @@ public class BybitFuturesClient implements Client {
                                 }
                             }
 
-                            double bid = bidPrice == null ? lastSpotBid : bidPrice.getDouble("price");
-                            double ask = askPrice == null ? lastSpotAsk : askPrice.getDouble("price");
+                            double bid = bidPrice == null ? lastBid : bidPrice.getDouble("price");
+                            double ask = askPrice == null ? lastAsk : askPrice.getDouble("price");
+                            double bidSize = bidPrice == null ? lastBidSize : bidPrice.getDouble("size");
+                            double askSize = askPrice == null ? lastAskSize : askPrice.getDouble("size");
                             lastBidId = bidPrice == null ? lastBidId : bidPrice.getString("id");
                             lastAskId = askPrice == null ? lastAskId : askPrice.getString("id");
 
-                            if (!Precision.equals(lastSpotBid, bid) ||
-                                    !Precision.equals(lastSpotAsk, ask)) {
+                            if (!Precision.equals(lastBid, bid) ||
+                                !Precision.equals(lastAsk, ask) ||
+                                !Precision.equals(lastBidSize, bidSize) ||
+                                !Precision.equals(lastAskSize, askSize)) {
 
                                 Tick tick = new Tick.Builder()
                                         .exchange("bybit")
                                         .timestamp(Instant.ofEpochMilli(json.getLong("timestamp_e6") / 1000))
                                         .bid(bid)
                                         .ask(ask)
+                                        .bidSize(bidSize)
+                                        .askSize(askSize)
                                         .build();
 
-                                lastSpotBid = bid;
-                                lastSpotAsk = ask;
+                                lastBid = bid;
+                                lastAsk = ask;
+                                lastBidSize = bidSize;
+                                lastAskSize = askSize;
 
                                 tickEventProcessor.publishTick(tick);
                             }
@@ -99,12 +114,14 @@ public class BybitFuturesClient implements Client {
                             JSONObject price = delete.getJSONObject(i);
                             if ("Buy".equals(price.getString("side")) && price.getString("id").equals(lastBidId)) {
                                 lastBidId = null;
-                                lastSpotBid = 0;
+                                lastBid = 0;
+                                lastBidSize = 0;
                             }
 
                             if ("Sell".equals(price.getString("side")) && price.getString("id").equals(lastAskId)) {
                                 lastAskId = null;
-                                lastSpotAsk = Double.MAX_VALUE;
+                                lastAsk = Double.MAX_VALUE;
+                                lastAskSize = 0;
                             }
                         }
                     }
@@ -118,26 +135,30 @@ public class BybitFuturesClient implements Client {
                         for (int i = 0; i < update.length(); i++) {
 
                             JSONObject price = update.getJSONObject(i);
-                            if ("Buy".equals(price.getString("side")) && price.getDouble("price") > lastSpotBid) {
+                            if ("Buy".equals(price.getString("side")) && price.getDouble("price") > lastBid) {
                                 bidPrice = price;
                             }
 
-                            if ("Sell".equals(price.getString("side")) && price.getDouble("price") < lastSpotAsk) {
-                                if(lastSpotAsk == Double.MAX_VALUE){
-                                    lastSpotAsk = price.getDouble("price");
+                            if ("Sell".equals(price.getString("side")) && price.getDouble("price") < lastAsk) {
+                                if(lastAsk == Double.MAX_VALUE){
+                                    lastAsk = price.getDouble("price");
                                 }
 
                                 askPrice = price;
                             }
                         }
 
-                        double bid = bidPrice == null ? lastSpotBid : bidPrice.getDouble("price");
-                        double ask = askPrice == null ? lastSpotAsk : askPrice.getDouble("price");
+                        double bid = bidPrice == null ? lastBid : bidPrice.getDouble("price");
+                        double ask = askPrice == null ? lastAsk : askPrice.getDouble("price");
+                        double bidSize = bidPrice == null ? lastBidSize : bidPrice.getDouble("size");
+                        double askSize = askPrice == null ? lastAskSize : askPrice.getDouble("size");
                         lastBidId = bidPrice == null ? lastBidId : bidPrice.getString("id");
                         lastAskId = askPrice == null ? lastAskId : askPrice.getString("id");
 
-                        if (!Precision.equals(lastSpotBid, bid) ||
-                            !Precision.equals(lastSpotAsk, ask)) {
+                        if (!Precision.equals(lastBid, bid) ||
+                            !Precision.equals(lastAsk, ask) ||
+                            !Precision.equals(lastBidSize, bidSize) ||
+                            !Precision.equals(lastAskSize, askSize)) {
 
                             Tick tick = new Tick.Builder()
                                     .exchange("bybit")
@@ -145,10 +166,14 @@ public class BybitFuturesClient implements Client {
                                     .timestamp(Instant.ofEpochMilli(json.getLong("timestamp_e6") / 1000))
                                     .bid(bid)
                                     .ask(ask)
+                                    .bidSize(bidSize)
+                                    .askSize(askSize)
                                     .build();
 
-                            lastSpotBid = bid;
-                            lastSpotAsk = ask;
+                            lastBid = bid;
+                            lastAsk = ask;
+                            lastBidSize = bidSize;
+                            lastAskSize = askSize;
 
                             tickEventProcessor.publishTick(tick);
                         }
@@ -157,12 +182,12 @@ public class BybitFuturesClient implements Client {
 
                 @Override
                 public void onOpen(ServerHandshake serverHandshake) {
-                    System.out.println("Connected to Bybit Futures.");
+                    LOGGER.info("Connected to Bybit Futures.");
                 }
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("Bybit Futures closed connection");
+                    LOGGER.info("Bybit Futures closed connection");
                 }
 
                 @Override

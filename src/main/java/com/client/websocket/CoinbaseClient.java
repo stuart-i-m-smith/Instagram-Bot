@@ -7,12 +7,17 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 public class CoinbaseClient implements Client {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final String currency;
     private final TickEventProcessor tickEventProcessor;
@@ -61,12 +66,12 @@ public class CoinbaseClient implements Client {
 
                 @Override
                 public void onOpen(ServerHandshake handshake) {
-                    System.out.println("Connected to Coinbase.");
+                    LOGGER.info("Connected to Coinbase.");
                 }
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("Coinbase closed connection");
+                    LOGGER.info("Coinbase closed connection");
                 }
 
                 @Override

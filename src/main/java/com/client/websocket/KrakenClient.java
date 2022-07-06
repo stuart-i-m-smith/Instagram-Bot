@@ -7,13 +7,18 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class KrakenClient implements Client {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private final String currency;
     private final TickEventProcessor tickEventProcessor;
@@ -30,6 +35,8 @@ public class KrakenClient implements Client {
 
                 private  double lastBid = 0;
                 private  double lastAsk = 0;
+                private  double lastBidSize = 0;
+                private  double lastAskSize = 0;
 
                 @Override
                 public void onMessage(String message) {
@@ -43,19 +50,27 @@ public class KrakenClient implements Client {
                         JSONArray offers = json.getJSONArray("a");
                         double bid = bids.getDouble(0);
                         double ask = offers.getDouble(0);
+                        double bidSize = bids.getDouble(1);
+                        double askSize = offers.getDouble(1);
 
                         if(!Precision.equals(lastBid, bid) ||
-                            !Precision.equals(lastAsk, ask)) {
+                            !Precision.equals(lastAsk, ask) ||
+                            !Precision.equals(lastBidSize, bidSize) ||
+                            !Precision.equals(lastAskSize, askSize)) {
 
                             Tick tick = new Tick.Builder()
                                     .exchange("kraken")
                                     .timestamp(Instant.now())
                                     .bid(bid)
                                     .ask(ask)
+                                    .bidSize(bidSize)
+                                    .askSize(askSize)
                                     .build();
 
                             lastBid = bid;
                             lastAsk = ask;
+                            lastBidSize = bidSize;
+                            lastAskSize = askSize;
 
                             tickEventProcessor.publishTick(tick);
                         }
@@ -64,12 +79,12 @@ public class KrakenClient implements Client {
 
                 @Override
                 public void onOpen(ServerHandshake serverHandshake) {
-                    System.out.println("Connected to Kraken.");
+                    LOGGER.info("Connected to Kraken.");
                 }
 
                 @Override
                 public void onClose(int code, String reason, boolean remote) {
-                    System.out.println("Kraken closed connection");
+                    LOGGER.info("Kraken closed connection");
                 }
 
                 @Override
