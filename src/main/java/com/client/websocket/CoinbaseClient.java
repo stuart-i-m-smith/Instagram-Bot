@@ -34,7 +34,9 @@ public class CoinbaseClient implements Client {
             WebSocketClient client = new WebSocketClient(new URI("wss://ws-feed.exchange.coinbase.com")) {
 
                 private  double lastBid = 0;
+                private  double lastBidSize = 0;
                 private  double lastAsk = 0;
+                private  double lastAskSize = 0;
 
                 @Override
                 public void onMessage(String message) {
@@ -42,24 +44,74 @@ public class CoinbaseClient implements Client {
                     JSONObject json = new JSONObject(message);
                     String type = json.getString("type");
 
-                    if ("ticker".equals(type)) {
-                        double bid = json.getDouble("best_bid");
-                        double ask = json.getDouble("best_ask");
+                    if (("snapshot").equals(type)) {
+                        JSONArray bids = json.getJSONArray("bids");
+                        JSONArray asks = json.getJSONArray("asks");
+
+                        double bid = bids.length() > 0 ? bids.getJSONArray(0).getDouble(0) : lastBid;
+                        double ask = asks.length() > 0 ? asks.getJSONArray(0).getDouble(0) : lastAsk;
+                        double bidSize = bids.length() > 0 ? bids.getJSONArray(1).getDouble(0) : lastBidSize;
+                        double askSize = asks.length() > 0 ? asks.getJSONArray(1).getDouble(0) : lastAskSize;
 
                         if(!Precision.equals(lastBid, bid) ||
-                            !Precision.equals(lastAsk, ask)) {
+                            !Precision.equals(lastAsk, ask) ||
+                            !Precision.equals(lastBidSize, bidSize) ||
+                            !Precision.equals(lastAskSize, askSize)) {
 
                             Tick tick = new Tick.Builder()
                                     .exchange("coinbase")
                                     .timestamp(Instant.parse(json.getString("time")))
                                     .bid(bid)
                                     .ask(ask)
+                                    .bidSize(bidSize)
+                                    .askSize(askSize)
                                     .build();
 
                             lastBid = bid;
                             lastAsk = ask;
+                            lastBidSize = bidSize;
+                            lastAskSize = askSize;
 
                             tickEventProcessor.publishTick(tick);
+                        }
+                    }
+
+                    if (("l2update").equals(type)) {
+                        JSONArray changes = json.getJSONArray("changes");
+
+                        for(int i=0;i<changes.length();i++){
+
+                            JSONArray change = changes.getJSONArray(i);
+
+                            JSONArray bids = json.getJSONArray("changes");
+                            JSONArray asks = json.getJSONArray("asks");
+
+                            double bid = bids.length() > 0 ? bids.getJSONArray(0).getDouble(0) : lastBid;
+                            double ask = asks.length() > 0 ? asks.getJSONArray(0).getDouble(0) : lastAsk;
+                            double bidSize = bids.length() > 0 ? bids.getJSONArray(1).getDouble(0) : lastBidSize;
+                            double askSize = asks.length() > 0 ? asks.getJSONArray(1).getDouble(0) : lastAskSize;
+
+                            if (!Precision.equals(lastBid, bid) ||
+                                    !Precision.equals(lastAsk, ask) ||
+                                    !Precision.equals(lastBidSize, bidSize) ||
+                                    !Precision.equals(lastAskSize, askSize)) {
+
+                                Tick tick = new Tick.Builder()
+                                        .exchange("coinbase")
+                                        .timestamp(Instant.parse(json.getString("time")))
+                                        .bid(bid)
+                                        .ask(ask)
+                                        .bidSize(bidSize)
+                                        .askSize(askSize)
+                                        .build();
+
+                                lastBid = bid;
+                                lastAsk = ask;
+                                lastBidSize = bidSize;
+                                lastAskSize = askSize;
+
+                                tickEventProcessor.publishTick(tick);
+                            }
                         }
                     }
                 }
@@ -86,7 +138,7 @@ public class CoinbaseClient implements Client {
             products.put(currency+"-USD");
 
             JSONArray channels = new JSONArray();
-            channels.put("ticker");
+            channels.put("level2");
 
             JSONObject subscribeMessage = new JSONObject();
             subscribeMessage.put("type", "subscribe");
