@@ -1,0 +1,77 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+   http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <bean id="ccyPair" class="java.lang.String">
+        <constructor-arg value="SOL"/>
+    </bean>
+
+    <bean id="spotBook" class="com.orderbook.Book">
+        <constructor-arg name="product" value="Spot" />
+    </bean>
+
+    <bean id="futureBook" class="com.orderbook.Book">
+        <constructor-arg name="product" value="Future" />
+    </bean>
+
+    <bean id="tickEventProcessor" class="com.TickEventProcessor" init-method="start">
+        <constructor-arg name="tickEventHandlers">
+            <array>
+                <ref bean="spotBook"/>
+                <ref bean="futureBook"/>
+            </array>
+        </constructor-arg>
+    </bean>
+
+    <bean id="spotBookReporter" class="com.orderbook.BookReporter" init-method="scheduleReport">
+        <constructor-arg name="book" ref="spotBook" />
+        <constructor-arg name="initialDelay" value="5" />
+    </bean>
+
+    <bean id="futureBookReporter" class="com.orderbook.BookReporter" init-method="scheduleReport">
+        <constructor-arg name="book" ref="futureBook" />
+        <constructor-arg name="initialDelay" value="8" />
+    </bean>
+
+    <bean id="coinbaseClient" class="com.client.websocket.CoinbaseClient" init-method="connect">
+        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
+    </bean>
+
+    <bean id="binanceClient" class="com.client.websocket.BinanceClient" init-method="connect">
+        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
+    </bean>
+
+    <bean id="bitstampClient" class="com.client.websocket.BitstampClient" init-method="connect">
+        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
+    </bean>
+
+    <bean id="bybitClient" class="com.client.websocket.BybitClient" init-method="connect">
+        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
+    </bean>
+
+    <bean id="ftxClient" class="com.client.websocket.FtxClient" init-method="connect">
+        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
+    </bean>
+
+    <bean id="gateIoClient" class="com.client.websocket.GateIoClient" init-method="connect">
+        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
+    </bean>
+
+    <bean id="krakenClient" class="com.client.websocket.KrakenClient" init-method="connect">
+        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
+    </bean>
+
+    <bean id="binanceFuturesClient" class="com.client.websocket.BinanceFuturesClient" init-method="connect">
+        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
+    </bean>
+</beans>

@@ -9,17 +9,21 @@ import com.model.TickEventHandler;
 
 public class TickEventProcessor {
 
-    private Disruptor<TickEvent> disruptor;
+    private final TickEventHandler[] tickEventHandlers;
     private RingBuffer<TickEvent> ringBuffer;
 
-    public void start(TickEventHandler... tickEventHandlers){
+    public TickEventProcessor(TickEventHandler... tickEventHandlers){
+        this.tickEventHandlers  = tickEventHandlers;
+    }
+
+    public void start(){
 
         int bufferSize = 1024;
 
-        this.disruptor = new Disruptor<>(TickEvent::new, bufferSize, DaemonThreadFactory.INSTANCE);
-        this.disruptor.handleEventsWith(tickEventHandlers);
+        Disruptor<TickEvent> disruptor = new Disruptor<>(TickEvent::new, bufferSize, DaemonThreadFactory.INSTANCE);
+        disruptor.handleEventsWith(tickEventHandlers);
         this.ringBuffer = disruptor.getRingBuffer();
-        this.disruptor.start();
+        disruptor.start();
     }
 
     public void publishTick(Tick tick){

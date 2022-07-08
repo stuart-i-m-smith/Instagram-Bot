@@ -18,12 +18,14 @@ public class BookReporter {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#,###.####");
 
     private final Book book;
+    private final int initialDelay;
 
-    public BookReporter(Book book){
+    public BookReporter(Book book, int initialDelay){
         this.book = book;
+        this.initialDelay = initialDelay;
     }
 
-    public void scheduleReport(int initialDelay){
+    public void scheduleReport(){
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
 
             List<Tick> bids = new ArrayList<>(book.getBids());
@@ -38,7 +40,7 @@ public class BookReporter {
                          +" ::: "+
                         getString(asks, counter, Tick::getAsk, Tick::getAskSize));
             }
-        }, initialDelay, 60, TimeUnit.SECONDS);
+        }, this.initialDelay, 60, TimeUnit.SECONDS);
     }
 
     private String getString(List<Tick> ticks, int index, Function<Tick, Double> priceFunction, Function<Tick, Double> sizeFunction){
