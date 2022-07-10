@@ -4,8 +4,9 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <bean id="ccyPair" class="java.lang.String">
+    <bean id="ccyPair" class="com.model.CcyPair">
         <constructor-arg value="SOL"/>
+        <constructor-arg value="USDT"/>
     </bean>
 
     <bean id="spotBook" class="com.orderbook.Book">
@@ -36,42 +37,42 @@
     </bean>
 
     <bean id="coinbaseClient" class="com.client.websocket.CoinbaseClient" init-method="connect">
-        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="ccyPair" ref="ccyPair" />
         <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
     </bean>
 
     <bean id="binanceClient" class="com.client.websocket.BinanceClient" init-method="connect">
-        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="ccyPair" ref="ccyPair" />
         <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
     </bean>
 
     <bean id="bitstampClient" class="com.client.websocket.BitstampClient" init-method="connect">
-        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="ccyPair" ref="ccyPair" />
         <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
     </bean>
 
     <bean id="bybitClient" class="com.client.websocket.BybitClient" init-method="connect">
-        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="ccyPair" ref="ccyPair" />
         <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
     </bean>
 
     <bean id="ftxClient" class="com.client.websocket.FtxClient" init-method="connect">
-        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="ccyPair" ref="ccyPair" />
         <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
     </bean>
 
     <bean id="gateIoClient" class="com.client.websocket.GateIoClient" init-method="connect">
-        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="ccyPair" ref="ccyPair" />
         <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
     </bean>
 
     <bean id="krakenClient" class="com.client.websocket.KrakenClient" init-method="connect">
-        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="ccyPair" ref="ccyPair" />
         <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
     </bean>
 
     <bean id="binanceFuturesClient" class="com.client.websocket.BinanceFuturesClient" init-method="connect">
-        <constructor-arg name="currency" ref="ccyPair" />
+        <constructor-arg name="ccyPair" ref="ccyPair" />
         <constructor-arg name="tickEventProcessor" ref="tickEventProcessor" />
     </bean>
 </beans>

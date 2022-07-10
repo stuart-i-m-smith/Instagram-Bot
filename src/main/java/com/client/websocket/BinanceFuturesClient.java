@@ -3,6 +3,7 @@ package com.client.websocket;
 import com.TickEventProcessor;
 import com.binance.connector.client.impl.WebsocketClientImpl;
 import com.binance.connector.client.utils.WebSocketCallback;
+import com.model.CcyPair;
 import com.model.Product;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
@@ -17,11 +18,11 @@ public class BinanceFuturesClient implements Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final String currency;
+    private final CcyPair ccyPair;
     private final TickEventProcessor tickEventProcessor;
 
-    public BinanceFuturesClient(String currency, TickEventProcessor tickEventProcessor){
-        this.currency = currency;
+    public BinanceFuturesClient(CcyPair ccyPair, TickEventProcessor tickEventProcessor){
+        this.ccyPair = ccyPair;
         this.tickEventProcessor = tickEventProcessor;
     }
 
@@ -32,7 +33,7 @@ public class BinanceFuturesClient implements Client {
 
         LOGGER.info("Connected to Binance Futures.");
 
-        client.bookTicker(currency+"usdt", new WebSocketCallback() {
+        client.bookTicker(ccyPair.getCcy1() + ccyPair.getCcy2(), new WebSocketCallback() {
             private  double lastBid = 0;
             private  double lastAsk = 0;
             private  double lastBidSize = 0;

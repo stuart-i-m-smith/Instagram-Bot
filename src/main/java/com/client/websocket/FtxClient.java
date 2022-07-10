@@ -1,6 +1,7 @@
 package com.client.websocket;
 
 import com.TickEventProcessor;
+import com.model.CcyPair;
 import com.model.Product;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
@@ -21,11 +22,11 @@ public class FtxClient implements Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final String currency;
+    private final CcyPair ccyPair;
     private final TickEventProcessor tickEventProcessor;
 
-    public FtxClient(String currency, TickEventProcessor tickEventProcessor){
-        this.currency = currency;
+    public FtxClient(CcyPair ccyPair, TickEventProcessor tickEventProcessor){
+        this.ccyPair = ccyPair;
         this.tickEventProcessor = tickEventProcessor;
     }
 
@@ -145,10 +146,10 @@ public class FtxClient implements Client {
             subscribeMessage.put("op", "subscribe");
             subscribeMessage.put("channel", "orderbook");
 
-            subscribeMessage.put("market", currency+"/USD");
+            subscribeMessage.put("market", ccyPair.getCcy1() +"/"+ ccyPair.getCcy2().replace("USDT", "USD"));
             client.send(subscribeMessage.toString());
 
-            subscribeMessage.put("market", currency+"-PERP");
+            subscribeMessage.put("market", ccyPair.getCcy1() +"-PERP");
             client.send(subscribeMessage.toString());
 
             Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(

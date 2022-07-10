@@ -1,6 +1,7 @@
 package com.client.websocket;
 
 import com.TickEventProcessor;
+import com.model.CcyPair;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
@@ -20,11 +21,11 @@ public class KrakenClient implements Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final String currency;
+    private final CcyPair ccyPair;
     private final TickEventProcessor tickEventProcessor;
 
-    public KrakenClient(String currency, TickEventProcessor tickEventProcessor){
-        this.currency = currency;
+    public KrakenClient(CcyPair ccyPair, TickEventProcessor tickEventProcessor){
+        this.ccyPair = ccyPair;
         this.tickEventProcessor = tickEventProcessor;
     }
 
@@ -96,7 +97,7 @@ public class KrakenClient implements Client {
             client.connectBlocking(10, TimeUnit.SECONDS);
 
             JSONArray pairs = new JSONArray();
-            pairs.put(currency+"/USD");
+            pairs.put(ccyPair.getCcy1() +"/"+ ccyPair.getCcy2().replace("USDT", "USD"));
 
             JSONObject subscription = new JSONObject();
             subscription.put("name", "ticker");

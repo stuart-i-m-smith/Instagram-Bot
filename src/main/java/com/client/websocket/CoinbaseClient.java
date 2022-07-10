@@ -2,6 +2,7 @@ package com.client.websocket;
 
 import com.TickEventProcessor;
 import com.model.Bucket;
+import com.model.CcyPair;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
@@ -22,11 +23,11 @@ public class CoinbaseClient implements Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final String currency;
+    private final CcyPair ccyPair;
     private final TickEventProcessor tickEventProcessor;
 
-    public CoinbaseClient(String currency, TickEventProcessor tickEventProcessor){
-        this.currency = currency;
+    public CoinbaseClient(CcyPair ccyPair, TickEventProcessor tickEventProcessor){
+        this.ccyPair = ccyPair;
         this.tickEventProcessor = tickEventProcessor;
     }
 
@@ -170,7 +171,7 @@ public class CoinbaseClient implements Client {
             client.connectBlocking(10, TimeUnit.SECONDS);
 
             JSONArray products = new JSONArray();
-            products.put(currency+"-USD");
+            products.put(ccyPair.getCcy1() +"-"+ ccyPair.getCcy2());
 
             JSONArray channels = new JSONArray();
             channels.put("level2");

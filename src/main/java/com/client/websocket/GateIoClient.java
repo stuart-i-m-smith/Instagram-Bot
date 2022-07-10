@@ -1,6 +1,7 @@
 package com.client.websocket;
 
 import com.TickEventProcessor;
+import com.model.CcyPair;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
@@ -19,12 +20,12 @@ public class GateIoClient implements Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final String currency;
+    private final CcyPair ccyPair;
     private final TickEventProcessor tickEventProcessor;
 
-    public GateIoClient(String currency,
+    public GateIoClient(CcyPair ccyPair,
                         TickEventProcessor tickEventProcessor){
-        this.currency = currency;
+        this.ccyPair = ccyPair;
         this.tickEventProcessor = tickEventProcessor;
     }
 
@@ -132,7 +133,7 @@ public class GateIoClient implements Client {
             client.connectBlocking(10, TimeUnit.SECONDS);
 
             JSONArray btcUsd = new JSONArray();
-            btcUsd.put(currency+"_USDT");
+            btcUsd.put(ccyPair.getCcy1() +"_"+ ccyPair.getCcy2());
             btcUsd.put(5);
             btcUsd.put("0.01");
 

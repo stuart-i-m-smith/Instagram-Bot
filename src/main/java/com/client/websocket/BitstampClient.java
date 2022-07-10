@@ -1,6 +1,7 @@
 package com.client.websocket;
 
 import com.TickEventProcessor;
+import com.model.CcyPair;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
 import org.java_websocket.client.WebSocketClient;
@@ -19,11 +20,11 @@ public class BitstampClient implements Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final String currency;
+    private final CcyPair ccyPair;
     private final TickEventProcessor tickEventProcessor;
 
-    public BitstampClient(String currency, TickEventProcessor tickEventProcessor){
-        this.currency = currency;
+    public BitstampClient(CcyPair ccyPair, TickEventProcessor tickEventProcessor){
+        this.ccyPair = ccyPair;
         this.tickEventProcessor = tickEventProcessor;
     }
 
@@ -106,7 +107,7 @@ public class BitstampClient implements Client {
             client.connectBlocking(10, TimeUnit.SECONDS);
 
             JSONObject data = new JSONObject();
-            data.put("channel", "order_book_"+currency+"usd");
+            data.put("channel", "order_book_"+ccyPair.getCcy1() + ccyPair.getCcy2().replace("USDT", "USD"));
 
             JSONObject subscribeMessage = new JSONObject();
             subscribeMessage.put("event", "bts:subscribe");

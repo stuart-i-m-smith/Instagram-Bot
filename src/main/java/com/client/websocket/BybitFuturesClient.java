@@ -1,6 +1,7 @@
 package com.client.websocket;
 
 import com.TickEventProcessor;
+import com.model.CcyPair;
 import com.model.Product;
 import com.model.Tick;
 import org.apache.commons.math3.util.Precision;
@@ -21,11 +22,11 @@ public class BybitFuturesClient implements Client {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-    private final String currency;
+    private final CcyPair ccyPair;
     private final TickEventProcessor tickEventProcessor;
 
-    public BybitFuturesClient(String currency, TickEventProcessor tickEventProcessor){
-        this.currency = currency;
+    public BybitFuturesClient(CcyPair ccyPair, TickEventProcessor tickEventProcessor){
+        this.ccyPair = ccyPair;
         this.tickEventProcessor = tickEventProcessor;
     }
 
@@ -199,7 +200,7 @@ public class BybitFuturesClient implements Client {
             client.connectBlocking(10, TimeUnit.SECONDS);
 
             JSONArray args = new JSONArray();
-            args.put("orderBookL2_25."+currency+"USDT");
+            args.put("orderBookL2_25."+ccyPair.getCcy1() + ccyPair.getCcy2());
 
             JSONObject subscribeMessage = new JSONObject();
             subscribeMessage.put("op", "subscribe");
