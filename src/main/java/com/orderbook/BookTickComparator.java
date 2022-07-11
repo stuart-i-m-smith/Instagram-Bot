@@ -24,7 +24,11 @@ public class BookTickComparator implements Comparator<Tick> {
             int sizeComparison = sizeFunction.apply(t1).compareTo(sizeFunction.apply(t2));
 
             if(sizeComparison == 0){
-                return t1.getTimestamp().compareTo(t2.getTimestamp());
+                int timeComparison = t1.getTimestamp().compareTo(t2.getTimestamp());
+
+                if(timeComparison == 0){
+                    return t1.getExchange().compareTo(t2.getExchange());
+                }
             }
         }
 

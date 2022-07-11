@@ -1,21 +1,23 @@
 package com.model;
 
+import java.util.Set;
+
 public class TickEvent {
 
-    private Tick tick;
+    private Set<Tick> ticks;
 
-    public Tick getTick() {
-        return tick;
+    public Set<Tick> getTicks() {
+        return ticks;
     }
 
-    public void setTick(Tick tick) {
-        this.tick = tick;
+    public void setTicks(Set<Tick> ticks) {
+        this.ticks = ticks;
     }
 
     @Override
     public String toString() {
         return "TickEvent{" +
-                "tick=" + tick +
+                "ticks=" + ticks +
                 '}';
     }
 }

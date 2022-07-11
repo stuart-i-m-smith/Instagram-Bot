@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.time.Instant;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -82,7 +83,7 @@ public class BitstampClient implements Client {
                                 lastBidSize = tick.getBidSize();
                                 lastAskSize = tick.getAskSize();
 
-                                tickEventProcessor.publishTick(tick);
+                                tickEventProcessor.publishTicks(Set.of(tick));
                             }
                         }
                     }

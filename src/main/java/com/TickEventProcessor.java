@@ -7,6 +7,8 @@ import com.model.Tick;
 import com.model.TickEvent;
 import com.model.TickEventHandler;
 
+import java.util.Set;
+
 public class TickEventProcessor {
 
     private final TickEventHandler[] tickEventHandlers;
@@ -26,7 +28,7 @@ public class TickEventProcessor {
         disruptor.start();
     }
 
-    public void publishTick(Tick tick){
-        ringBuffer.publishEvent((event, sequence, buffer) -> event.setTick(tick));
+    public void publishTicks(Set<Tick> ticks){
+        ringBuffer.publishEvent((event, sequence, buffer) -> event.setTicks(ticks));
     }
 }

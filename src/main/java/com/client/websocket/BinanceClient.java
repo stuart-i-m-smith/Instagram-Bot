@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.invoke.MethodHandles;
 import java.time.Instant;
+import java.util.Set;
 
 public class BinanceClient implements Client {
 
@@ -66,7 +67,7 @@ public class BinanceClient implements Client {
                     lastBidSize = bidSize;
                     lastAskSize = askSize;
 
-                    tickEventProcessor.publishTick(tick);
+                    tickEventProcessor.publishTicks(Set.of(tick));
                 }
             }
         });

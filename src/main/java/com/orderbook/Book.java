@@ -20,15 +20,19 @@ public class Book implements TickEventHandler {
 
     @Override
     public void onEvent(TickEvent tickEvent, long l, boolean b) {
-        if(product != tickEvent.getTick().getProduct()){
-            return;
+
+        for(Tick tick : tickEvent.getTicks()){
+
+            if (product != tick.getProduct()) {
+                return;
+            }
+
+            bids.removeIf(t -> t.getExchange().equals(tick.getExchange()));
+            asks.removeIf(t -> t.getExchange().equals(tick.getExchange()));
+
+            bids.add(tick);
+            asks.add(tick);
         }
-
-        bids.removeIf(tick -> tick.getExchange().equals(tickEvent.getTick().getExchange()));
-        asks.removeIf(tick -> tick.getExchange().equals(tickEvent.getTick().getExchange()));
-
-        bids.add(tickEvent.getTick());
-        asks.add(tickEvent.getTick());
     }
 
     public Collection<Tick> getBids(){

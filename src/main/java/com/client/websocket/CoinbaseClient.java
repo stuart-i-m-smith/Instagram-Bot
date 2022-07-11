@@ -16,6 +16,7 @@ import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
@@ -81,7 +82,7 @@ public class CoinbaseClient implements Client {
                                 tick.ask(askBuckets.first().getPrice())
                                     .askSize(askBuckets.first().getSize());
                             }
-                            tickEventProcessor.publishTick(tick.build());
+                            tickEventProcessor.publishTicks(Set.of(tick.build()));
                         }
                     }
 
@@ -147,7 +148,7 @@ public class CoinbaseClient implements Client {
                                     .askSize(lastAskBucket.getSize());
                             }
 
-                            tickEventProcessor.publishTick(tick.build());
+                            tickEventProcessor.publishTicks(Set.of(tick.build()));
                         }
                     }
                 }

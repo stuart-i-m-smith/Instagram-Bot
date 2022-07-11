@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.time.Instant;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -77,7 +78,7 @@ public class BybitClient implements Client {
                         lastSpotBidSize = bidSize;
                         lastSpotAskSize = askSize;
 
-                        tickEventProcessor.publishTick(tick);
+                        tickEventProcessor.publishTicks(Set.of(tick));
                     }
                 }
 

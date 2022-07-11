@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.invoke.MethodHandles;
 import java.net.URI;
 import java.time.Instant;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class GateIoClient implements Client {
@@ -108,7 +109,7 @@ public class GateIoClient implements Client {
                             Tick tick = tickBuilder.build();
 
                             if(isUpdated) {
-                                tickEventProcessor.publishTick(tick);
+                                tickEventProcessor.publishTicks(Set.of(tick));
                             }
                         }
                     }
