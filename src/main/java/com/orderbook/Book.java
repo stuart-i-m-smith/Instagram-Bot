@@ -6,8 +6,12 @@ import com.model.TickEvent;
 import com.model.TickEventHandler;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Book implements TickEventHandler {
+
+    private static final Map<Product, Book> BOOK_MAP = new ConcurrentHashMap<>();
+    private static final List<TickEventHandler> tickEventHandlers = new ArrayList<>();
 
     private final Product product;
 
@@ -16,6 +20,7 @@ public class Book implements TickEventHandler {
 
     public Book(Product product){
         this.product = product;
+        BOOK_MAP.put(product, this);
     }
 
     @Override
@@ -33,6 +38,8 @@ public class Book implements TickEventHandler {
             bids.add(tick);
             asks.add(tick);
         }
+
+        tickEventHandlers.forEach(t -> t.onEvent(tickEvent, l, b));
     }
 
     public Collection<Tick> getBids(){
@@ -45,5 +52,13 @@ public class Book implements TickEventHandler {
 
     public Product getProduct() {
         return this.product;
+    }
+
+    public static Book getBook(Product product){
+        return BOOK_MAP.get(product);
+    }
+
+    public static void addListener(TickEventHandler tickEventHandler){
+        tickEventHandlers.add(tickEventHandler);
     }
 }
