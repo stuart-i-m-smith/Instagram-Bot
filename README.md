@@ -1,11 +1,11 @@
-# crypto-aggregator
+# Instagram Bot
 
-Retrieves multiple street prices and collates an aggregated book of prices.
+Auto follow/unfollow and auto like instagram accounts
 
 ## To Do:
-- Multiple pairs
-- Aggregate entire book not just BBO
-- Store funding rates
-- Java FX UI
+- Target accounts
+- Auto like
+- Auto follow
+- Unfollow after set period if no followback
 - TESTS!!
 - Other ideas welcome!

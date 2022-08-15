@@ -9,5 +9,4 @@
         <appender-ref ref="STDOUT" />
     </root>
 
-    <logger name="com.binance.connector.client.utils.WebSocketConnection" level="OFF"/>
 </configuration>

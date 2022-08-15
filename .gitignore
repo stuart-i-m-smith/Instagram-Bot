@@ -11,3 +11,4 @@ target/*
 !.idea/runConfigurations/**
 !.idea/*.xml
 .idea/*
+/src/main/resources/account.properties
