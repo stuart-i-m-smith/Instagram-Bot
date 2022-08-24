@@ -5,11 +5,11 @@ import com.github.instagram4j.instagram4j.actions.feed.FeedIterable;
 import com.github.instagram4j.instagram4j.actions.users.UserAction;
 import com.github.instagram4j.instagram4j.models.media.timeline.TimelineMedia;
 import com.github.instagram4j.instagram4j.models.user.Profile;
+import com.github.instagram4j.instagram4j.models.user.User;
 import com.github.instagram4j.instagram4j.requests.feed.FeedUserRequest;
-import com.github.instagram4j.instagram4j.requests.feed.FeedUserStoryRequest;
+import com.github.instagram4j.instagram4j.requests.friendships.FriendshipsActionRequest;
 import com.github.instagram4j.instagram4j.requests.friendships.FriendshipsFeedsRequest;
 import com.github.instagram4j.instagram4j.responses.feed.FeedUserResponse;
-import com.github.instagram4j.instagram4j.responses.feed.FeedUserStoryResponse;
 import com.github.instagram4j.instagram4j.responses.feed.FeedUsersResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +20,10 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-import java.util.function.BinaryOperator;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Main {
 
@@ -41,12 +36,14 @@ public class Main {
             properties.load(input);
         }
 
+        String targetAccount = properties.getProperty("targetAccount");
+
         IGClient client = IGClient.builder()
                 .username(properties.getProperty("username"))
                 .password(properties.getProperty("password"))
                 .login();
 
-        UserAction userAction = client.actions().users().findByUsername("that.mr.smith").get();
+        UserAction userAction = client.actions().users().findByUsername(targetAccount).get();
 
         FeedIterable<FriendshipsFeedsRequest, FeedUsersResponse> followers = userAction.followersFeed();
 
@@ -65,7 +62,7 @@ public class Main {
         }
 
         List<Profile> nonFollowers = new ArrayList<>();
-        Set<String> whiteListAccounts = Files.lines(Paths.get("src/main/resources/accountswhitelist.txt")).collect(Collectors.toSet());
+        Set<String> whiteListAccounts = Files.lines(Paths.get(properties.getProperty("whitelistpath"))).collect(Collectors.toSet());
 
         for(Profile followingUser : followingUsers){
 
@@ -79,23 +76,43 @@ public class Main {
                 List<TimelineMedia> posts = userFeed.getItems();
 
                 if(posts.size() > 0) {
-                    List<Map<String, Object>> likers = (List<Map<String, Object>>)posts.get(0).getExtraProperties().get("likers");
-
-                    boolean hasPostedSinceLiked = likers == null ||
-                            likers.stream().noneMatch(liker -> "that.mr.smith".equals(liker.get("username")));
+                    boolean hasPostedSinceLiked = hasPostedSinceLiked(targetAccount, posts.get(0), targetAccount.equals(properties.getProperty("username")));
 
                     if(hasPostedSinceLiked) {
-//                        FeedUserStoryResponse userStories = new FeedUserStoryRequest(followingUser.getPk()).execute(client).join();
-//                        if(userStories.getReel().getItems().size() > 0)
                         nonFollowers.add(followingUser);
                     }
                 }
             }
-
         }
 
         LOGGER.info("Non followers that have posted since following:");
         nonFollowers.forEach(profile -> LOGGER.info(profile.getUsername()));
         LOGGER.info("======");
+
+        if(Boolean.parseBoolean(properties.getProperty("unfollowEnabled")) && targetAccount.equals(properties.getProperty("username"))){
+            nonFollowers.forEach(profile -> {
+                LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
+                CompletableFuture<User> info = client.actions().users().info(profile.getPk());
+                try {
+                    User user = info.get();
+                    LOGGER.info("Unfollowing <{}>", user.getUsername());
+                    LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(1));
+                    new UserAction(client, user).action(FriendshipsActionRequest.FriendshipsAction.REMOVE_FOLLOWER);
+                } catch (Exception e) {
+                    LOGGER.error("Problem unfollowing user", e);
+                }
+            });
+        }
+    }
+
+    private static boolean hasPostedSinceLiked(String targetAccount, TimelineMedia post, boolean isClientTarget){
+        if(isClientTarget){
+            return post.isHas_liked();
+        }
+
+        List<Map<String, Object>> likers = (List<Map<String, Object>>)post.getExtraProperties().get("likers");
+
+        return likers == null ||
+                likers.stream().noneMatch(liker -> targetAccount.equals(liker.get("username")));
     }
 }
