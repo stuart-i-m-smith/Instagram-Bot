@@ -12,3 +12,4 @@ target/*
 !.idea/*.xml
 .idea/*
 /src/main/resources/account.properties
+/src/main/resources/accountswhitelist.txt
